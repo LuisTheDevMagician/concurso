@@ -5,7 +5,7 @@ import {
   getConcurso,
   getDisciplinas,
   getMateriasDoConcurso,
-  getRevisoesDoMes,
+  getRevisoesDoConcurso,
 } from "@/lib/queries";
 import { parseDiasSemana } from "@/lib/utils";
 
@@ -25,7 +25,7 @@ export default async function ConcursoPage(
   );
   const materias = getMateriasDoConcurso(concurso.id);
   const now = new Date();
-  const revisoes = getRevisoesDoMes(concurso.id, now.getFullYear(), now.getMonth());
+  const revisoes = getRevisoesDoConcurso(concurso.id);
 
   return (
     <div className="flex flex-col gap-8">

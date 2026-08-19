@@ -96,13 +96,7 @@ export function getMateriasDoConcurso(
   })[];
 }
 
-export function getRevisoesDoMes(
-  concursoId: number,
-  ano: number,
-  mes: number
-): RevisaoComMateria[] {
-  const inicio = `${ano}-${String(mes + 1).padStart(2, "0")}-01`;
-  const fim = `${ano}-${String(mes + 2).padStart(2, "0")}-01`;
+export function getRevisoesDoConcurso(concursoId: number): RevisaoComMateria[] {
   return db
     .prepare(
       `SELECT
@@ -115,9 +109,7 @@ export function getRevisoesDoMes(
       INNER JOIN materias m ON m.id = r.materia_id
       INNER JOIN disciplinas d ON d.id = m.disciplina_id
       WHERE d.concurso_id = ?
-        AND r.data >= ?
-        AND r.data < ?
       ORDER BY r.data ASC`
     )
-    .all(concursoId, inicio, fim) as RevisaoComMateria[];
+    .all(concursoId) as RevisaoComMateria[];
 }
