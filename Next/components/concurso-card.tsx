@@ -27,7 +27,7 @@ export function ConcursoCard({
         className="absolute inset-0 z-0"
         aria-label={concurso.nome}
       />
-      <CardHeader className="relative z-10 flex flex-row items-start justify-between gap-2">
+      <CardHeader className="flex flex-row items-start justify-between gap-2">
         <div>
           <CardTitle>{concurso.nome}</CardTitle>
           <CardDescription>
