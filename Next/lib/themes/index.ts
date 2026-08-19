@@ -1,10 +1,11 @@
 import type { Theme, ThemeTokens } from "./types";
 import { petroleoTheme } from "./petroleo";
 import { crystalGreenTheme } from "./crystal-green";
+import { cyberpunkTheme } from "./cyberpunk";
 
 export type { Theme, ThemeTokens };
 
-export const THEMES: Theme[] = [petroleoTheme, crystalGreenTheme];
+export const THEMES: Theme[] = [petroleoTheme, crystalGreenTheme, cyberpunkTheme];
 
 export const DEFAULT_THEME_ID = petroleoTheme.id;
 
