@@ -23,7 +23,7 @@ export function DiasSemanaToggle({
         <ToggleGroupItem
           key={dia.value}
           value={dia.value}
-          className="aria-pressed:border-yellow-500/50 aria-pressed:bg-yellow-500/20 aria-pressed:text-yellow-400 aria-pressed:hover:bg-yellow-500/30"
+          className="aria-pressed:border-primary/50 aria-pressed:bg-primary/20 aria-pressed:text-primary aria-pressed:hover:bg-primary/30"
         >
           {dia.label}
         </ToggleGroupItem>

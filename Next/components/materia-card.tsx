@@ -1,12 +1,12 @@
 "use client";
 
 import { memo, useState } from "react";
-import { Card, CardTitle } from "@/components/ui/card";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { EntityMenu } from "@/components/entity-menu";
 import { MateriaCheckbox } from "@/components/materia-checkbox";
 import { MateriaFormDialog } from "@/components/materia-form-dialog";
 import { deleteMateria } from "@/lib/actions/materias";
+import { cn } from "@/lib/utils";
 import type { Materia } from "@/lib/types";
 
 export const MateriaCard = memo(function MateriaCard({
@@ -22,24 +22,29 @@ export const MateriaCard = memo(function MateriaCard({
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
-    <Card
-      className="flex flex-row items-center justify-between gap-2 border-l-4 px-4 py-3"
-      style={{ borderLeftColor: cor }}
-    >
-      <div className="flex items-center gap-3">
-        <MateriaCheckbox materiaId={materia.id} estudado={materia.estudado} />
-        <CardTitle
-          className={
-            materia.estudado ? "text-muted-foreground line-through" : undefined
-          }
-        >
-          {materia.nome}
-        </CardTitle>
-      </div>
-      <EntityMenu
-        onEdit={() => setEditOpen(true)}
-        onDelete={() => setDeleteOpen(true)}
+    <div className="group/row flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40">
+      <span
+        aria-hidden
+        className="size-1.5 shrink-0 rounded-full"
+        style={{ backgroundColor: cor }}
       />
+      <MateriaCheckbox materiaId={materia.id} estudado={materia.estudado} />
+      <span
+        className={cn(
+          "flex-1 truncate text-sm",
+          materia.estudado
+            ? "text-muted-foreground line-through decoration-primary/50"
+            : "text-foreground"
+        )}
+      >
+        {materia.nome}
+      </span>
+      <div className="opacity-0 transition-opacity group-hover/row:opacity-100 group-focus-within/row:opacity-100">
+        <EntityMenu
+          onEdit={() => setEditOpen(true)}
+          onDelete={() => setDeleteOpen(true)}
+        />
+      </div>
 
       {editOpen ? (
         <MateriaFormDialog
@@ -59,6 +64,6 @@ export const MateriaCard = memo(function MateriaCard({
         }}
         onSuccess={() => setDeleteOpen(false)}
       />
-    </Card>
+    </div>
   );
 });

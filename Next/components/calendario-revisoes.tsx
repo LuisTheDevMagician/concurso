@@ -79,14 +79,14 @@ export function CalendarioRevisoes({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        <h2 className="font-mono text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Revisões
         </h2>
         <div className="flex items-center gap-1 ml-auto">
           <Button variant="ghost" size="icon" className="size-7" onClick={voltar}>
             <ChevronLeftIcon />
           </Button>
-          <span className="text-sm font-medium min-w-[140px] text-center">
+          <span className="font-mono text-sm font-medium min-w-[140px] text-center">
             {MESES[mes]} {ano}
           </span>
           <Button variant="ghost" size="icon" className="size-7" onClick={avancar}>
@@ -134,12 +134,12 @@ export function CalendarioRevisoes({
               onClick={() => items.length > 0 && onDiaClick(dia, items)}
               className={`bg-background min-h-16 px-1 py-1 text-left transition-colors ${
                 items.length > 0 ? "cursor-pointer hover:bg-muted/50" : "cursor-default"
-              } ${ehHoje ? "ring-2 ring-inset ring-yellow-400/60" : ""}`}
+              } ${ehHoje ? "ring-2 ring-inset ring-primary/60" : ""}`}
             >
               <span
-                className={`block text-right text-xs font-medium px-1 ${
+                className={`block text-right font-mono text-xs font-medium px-1 ${
                   ehHoje
-                    ? "text-yellow-400 font-bold"
+                    ? "text-primary font-semibold"
                     : items.length > 0
                       ? "text-foreground"
                       : "text-muted-foreground"
@@ -151,7 +151,7 @@ export function CalendarioRevisoes({
                 {Array.from(discUnicas.values()).map((d) => (
                   <span
                     key={d.nome}
-                    className="block truncate rounded px-1 py-px text-[10px] font-medium leading-tight text-white"
+                    className="block truncate rounded-sm px-1 py-px font-mono text-[10px] font-medium leading-tight text-white"
                     style={{ backgroundColor: d.cor }}
                     title={`${d.nome}${d.count > 1 ? ` (${d.count} revisões)` : ""}`}
                   >

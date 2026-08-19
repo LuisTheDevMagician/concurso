@@ -22,7 +22,9 @@ export default function Home() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Concursos</h1>
+          <h1 className="font-heading text-3xl font-medium tracking-tight">
+            Concursos
+          </h1>
           <p className="text-sm text-muted-foreground">
             Organize seus estudos por concurso, disciplina e matéria.
           </p>
@@ -39,12 +41,12 @@ export default function Home() {
           {concursosHoje.length > 0 && (
             <section className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
+                <h2 className="font-mono text-sm font-semibold uppercase tracking-wide text-primary">
                   {DIAS_SEMANA_FULL[diaAtual]}
                 </h2>
-                <Badge variant="secondary">Hoje</Badge>
+                <Badge>Hoje</Badge>
               </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="stagger-children grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {concursosHoje.map((c) => (
                   <ConcursoCard key={c.id} concurso={c} />
                 ))}
@@ -56,7 +58,7 @@ export default function Home() {
             <Separator />
           ) : null}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="stagger-children grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {concursos
               .filter((c) => !concursosHoje.some((h) => h.id === c.id))
               .map((concurso) => (

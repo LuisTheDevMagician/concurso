@@ -10,7 +10,7 @@ export default function HomeLoading() {
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-28 animate-pulse rounded-xl border-l-4 bg-card" />
+          <div key={i} className="h-28 animate-pulse rounded-xl border-t-2 bg-card" />
         ))}
       </div>
     </div>

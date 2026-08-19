@@ -3,12 +3,7 @@
 import { memo, useState } from "react";
 import Link from "next/link";
 import { ExternalLinkIcon } from "lucide-react";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { DisciplinaFormDialog } from "@/components/disciplina-form-dialog";
@@ -31,8 +26,8 @@ export const DisciplinaCard = memo(function DisciplinaCard({
 
   return (
     <Card
-      className="relative overflow-hidden border-l-4"
-      style={{ borderLeftColor: disciplina.cor }}
+      className="relative overflow-hidden border-t-2 transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_16px_32px_-18px_rgba(0,0,0,0.7)]"
+      style={{ borderTopColor: disciplina.cor }}
     >
       <Link
         href={`/concursos/${concursoId}/disciplinas/${disciplina.id}`}
@@ -40,13 +35,31 @@ export const DisciplinaCard = memo(function DisciplinaCard({
         aria-label={`${disciplina.nome}, ${disciplina.estudadas}/${disciplina.total} matérias estudadas`}
       />
       <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <div>
-          <CardTitle>{disciplina.nome}</CardTitle>
-          <CardDescription>
-            {disciplina.estudadas}/{disciplina.total} matérias estudadas
-          </CardDescription>
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span
+              aria-hidden
+              className="size-2.5 shrink-0 rounded-full transition-transform duration-200 group-hover/card:scale-125"
+              style={{ backgroundColor: disciplina.cor }}
+            />
+            <CardTitle className="truncate text-lg">{disciplina.nome}</CardTitle>
+          </div>
+          <div className="flex items-center gap-2 pl-5">
+            <span className="font-mono text-xs tabular-nums text-muted-foreground">
+              {String(disciplina.estudadas).padStart(2, "0")}/
+              {String(disciplina.total).padStart(2, "0")}
+            </span>
+            <span className="h-1 w-16 overflow-hidden rounded-full bg-muted">
+              <span
+                className="block h-full rounded-full bg-primary transition-[width] duration-500"
+                style={{
+                  width: `${disciplina.total ? (disciplina.estudadas / disciplina.total) * 100 : 0}%`,
+                }}
+              />
+            </span>
+          </div>
           {parseDiasSemana(disciplina.dias_semana).length > 0 ? (
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="pl-5 text-xs text-muted-foreground">
               {formatDiasSemana(disciplina.dias_semana)}
             </p>
           ) : null}
@@ -57,6 +70,7 @@ export const DisciplinaCard = memo(function DisciplinaCard({
               variant="ghost"
               size="icon"
               className="relative z-10"
+              nativeButton={false}
               render={
                 <a
                   href={disciplina.link_material}

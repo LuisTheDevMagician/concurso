@@ -19,6 +19,10 @@ export default async function DisciplinaPage(
   }
 
   const materias = getMaterias(disciplina.id);
+  const estudadas = materias.filter((m) => m.estudado).length;
+  const pct = materias.length
+    ? Math.round((estudadas / materias.length) * 100)
+    : 0;
 
   return (
     <div className="flex flex-col gap-8">
@@ -30,7 +34,7 @@ export default async function DisciplinaPage(
         ]}
       />
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-heading text-3xl font-medium tracking-tight">
           {disciplina.nome}
         </h1>
         <NewMateriaButton disciplinaId={disciplina.id} />
@@ -41,15 +45,32 @@ export default async function DisciplinaPage(
           Nenhuma matéria cadastrada ainda.
         </p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {materias.map((materia) => (
-            <MateriaCard
-              key={materia.id}
-              materia={materia}
-              disciplinaId={disciplina.id}
-              cor={disciplina.cor}
-            />
-          ))}
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4 rounded-xl border bg-card px-4 py-3">
+            <span className="font-mono text-sm tabular-nums text-muted-foreground">
+              {estudadas}/{materias.length}
+            </span>
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary transition-[width] duration-500"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className="font-mono text-xs tabular-nums text-muted-foreground">
+              {pct}%
+            </span>
+          </div>
+
+          <div className="stagger-children divide-y divide-dashed divide-border overflow-hidden rounded-xl border bg-card">
+            {materias.map((materia) => (
+              <MateriaCard
+                key={materia.id}
+                materia={materia}
+                disciplinaId={disciplina.id}
+                cor={disciplina.cor}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>

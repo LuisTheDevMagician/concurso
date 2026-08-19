@@ -47,7 +47,7 @@ export function ConcursoContent({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-heading text-3xl font-medium tracking-tight">
           {concurso.nome}
         </h1>
         <div className="flex items-center gap-2">
@@ -65,7 +65,7 @@ export function ConcursoContent({
         </p>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="stagger-children grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {disciplinas.map((disciplina) => (
               <DisciplinaCard
                 key={disciplina.id}

@@ -19,8 +19,8 @@ export const ConcursoCard = memo(function ConcursoCard({
 
   return (
     <Card
-      className="relative overflow-hidden border-l-4"
-      style={{ borderLeftColor: concurso.cor }}
+      className="relative overflow-hidden border-t-2 transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_16px_32px_-18px_rgba(0,0,0,0.7)]"
+      style={{ borderTopColor: concurso.cor }}
     >
       <Link
         href={`/concursos/${concurso.id}`}
@@ -28,7 +28,14 @@ export const ConcursoCard = memo(function ConcursoCard({
         aria-label={concurso.nome}
       />
       <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <CardTitle>{concurso.nome}</CardTitle>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span
+            aria-hidden
+            className="size-2.5 shrink-0 rounded-full transition-transform duration-200 group-hover/card:scale-125"
+            style={{ backgroundColor: concurso.cor }}
+          />
+          <CardTitle className="truncate text-lg">{concurso.nome}</CardTitle>
+        </div>
         <EntityMenu
           onEdit={() => setEditOpen(true)}
           onDelete={() => setDeleteOpen(true)}
