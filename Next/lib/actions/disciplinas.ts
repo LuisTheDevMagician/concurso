@@ -4,15 +4,36 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { validateNome } from "@/lib/utils";
 
+const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+const DIAS_RE = /^[0-6](,[0-6])*$/;
+
 export type DisciplinaFormState = { error?: string };
+
+function validateCor(cor: FormDataEntryValue | null) {
+  const corStr = String(cor ?? "").trim();
+  if (!HEX_RE.test(corStr)) return { error: "Cor inválida." } as const;
+  return { cor: corStr } as const;
+}
+
+function validateDias(dias: FormDataEntryValue | null) {
+  const diasStr = String(dias ?? "").trim();
+  if (diasStr && !DIAS_RE.test(diasStr)) {
+    return { error: "Dias da semana inválidos." } as const;
+  }
+  return { dias: diasStr } as const;
+}
 
 export async function createDisciplina(
   concursoId: number,
   _prevState: DisciplinaFormState,
   formData: FormData
 ): Promise<DisciplinaFormState> {
-  const result = validateNome(formData.get("nome"));
-  if ("error" in result) return result;
+  const nomeResult = validateNome(formData.get("nome"));
+  if ("error" in nomeResult) return nomeResult;
+  const corResult = validateCor(formData.get("cor"));
+  if ("error" in corResult) return corResult;
+  const diasResult = validateDias(formData.get("dias_semana"));
+  if ("error" in diasResult) return diasResult;
 
   try {
     const parent = db
@@ -20,10 +41,9 @@ export async function createDisciplina(
       .get(concursoId);
     if (!parent) return { error: "Concurso não encontrado." };
 
-    db.prepare(`INSERT INTO disciplinas (concurso_id, nome) VALUES (?, ?)`).run(
-      concursoId,
-      result.nome
-    );
+    db.prepare(
+      `INSERT INTO disciplinas (concurso_id, nome, cor, dias_semana) VALUES (?, ?, ?, ?)`
+    ).run(concursoId, nomeResult.nome, corResult.cor, diasResult.dias);
   } catch {
     return { error: "Erro ao criar disciplina." };
   }
@@ -36,13 +56,17 @@ export async function updateDisciplina(
   _prevState: DisciplinaFormState,
   formData: FormData
 ): Promise<DisciplinaFormState> {
-  const result = validateNome(formData.get("nome"));
-  if ("error" in result) return result;
+  const nomeResult = validateNome(formData.get("nome"));
+  if ("error" in nomeResult) return nomeResult;
+  const corResult = validateCor(formData.get("cor"));
+  if ("error" in corResult) return corResult;
+  const diasResult = validateDias(formData.get("dias_semana"));
+  if ("error" in diasResult) return diasResult;
 
   try {
     const { changes } = db
-      .prepare(`UPDATE disciplinas SET nome = ? WHERE id = ?`)
-      .run(result.nome, id);
+      .prepare(`UPDATE disciplinas SET nome = ?, cor = ?, dias_semana = ? WHERE id = ?`)
+      .run(nomeResult.nome, corResult.cor, diasResult.dias, id);
     if (changes === 0) return { error: "Disciplina não encontrada." };
   } catch {
     return { error: "Erro ao salvar disciplina." };

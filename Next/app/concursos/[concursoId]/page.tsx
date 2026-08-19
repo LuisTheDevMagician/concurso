@@ -1,8 +1,13 @@
 import { notFound } from "next/navigation";
 import { AppBreadcrumb } from "@/components/app-breadcrumb";
-import { DisciplinaCard } from "@/components/disciplina-card";
-import { NewDisciplinaButton } from "@/components/new-disciplina-button";
-import { getConcurso, getDisciplinas } from "@/lib/queries";
+import { ConcursoContent } from "@/components/concurso-content";
+import {
+  getConcurso,
+  getDisciplinas,
+  getMateriasDoConcurso,
+  getRevisoesDoMes,
+} from "@/lib/queries";
+import { parseDiasSemana } from "@/lib/utils";
 
 export default async function ConcursoPage(
   props: PageProps<"/concursos/[concursoId]">
@@ -15,35 +20,27 @@ export default async function ConcursoPage(
   if (!concurso) notFound();
 
   const disciplinas = getDisciplinas(concurso.id);
+  const comDia = disciplinas.filter(
+    (d) => parseDiasSemana(d.dias_semana).length > 0
+  );
+  const materias = getMateriasDoConcurso(concurso.id);
+  const now = new Date();
+  const revisoes = getRevisoesDoMes(concurso.id, now.getFullYear(), now.getMonth());
 
   return (
     <div className="flex flex-col gap-8">
       <AppBreadcrumb
         items={[{ label: "Concursos", href: "/" }, { label: concurso.nome }]}
       />
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {concurso.nome}
-        </h1>
-        <NewDisciplinaButton concursoId={concurso.id} />
-      </div>
-
-      {disciplinas.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Nenhuma disciplina cadastrada ainda.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {disciplinas.map((disciplina) => (
-            <DisciplinaCard
-              key={disciplina.id}
-              disciplina={disciplina}
-              concursoId={concurso.id}
-              cor={concurso.cor}
-            />
-          ))}
-        </div>
-      )}
+      <ConcursoContent
+        concurso={concurso}
+        disciplinas={disciplinas}
+        comDia={comDia}
+        materias={materias}
+        revisoes={revisoes}
+        ano={now.getFullYear()}
+        mes={now.getMonth()}
+      />
     </div>
   );
 }

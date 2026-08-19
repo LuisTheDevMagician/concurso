@@ -25,6 +25,8 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     concurso_id INTEGER NOT NULL REFERENCES concursos(id) ON DELETE CASCADE,
     nome TEXT NOT NULL,
+    cor TEXT NOT NULL DEFAULT '#6366f1',
+    dias_semana TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -33,6 +35,14 @@ db.exec(`
     disciplina_id INTEGER NOT NULL REFERENCES disciplinas(id) ON DELETE CASCADE,
     nome TEXT NOT NULL,
     estudado INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS revisoes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    materia_id INTEGER NOT NULL REFERENCES materias(id) ON DELETE CASCADE,
+    data TEXT NOT NULL,
+    revisao_numero INTEGER NOT NULL CHECK(revisao_numero BETWEEN 1 AND 4),
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 `);

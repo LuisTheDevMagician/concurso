@@ -47,7 +47,7 @@ export default async function DisciplinaPage(
               key={materia.id}
               materia={materia}
               disciplinaId={disciplina.id}
-              cor={concurso.cor}
+              cor={disciplina.cor}
             />
           ))}
         </div>

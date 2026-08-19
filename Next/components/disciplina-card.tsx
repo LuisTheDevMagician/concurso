@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, useTransition } from "react";
+import { memo, useState } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -12,16 +12,17 @@ import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { DisciplinaFormDialog } from "@/components/disciplina-form-dialog";
 import { EntityMenu } from "@/components/entity-menu";
 import { deleteDisciplina } from "@/lib/actions/disciplinas";
+import { formatDiasSemana, parseDiasSemana } from "@/lib/utils";
 import type { Disciplina, WithProgress } from "@/lib/types";
 
 export const DisciplinaCard = memo(function DisciplinaCard({
   disciplina,
   concursoId,
-  cor,
+  concursoCor,
 }: {
   disciplina: Disciplina & WithProgress;
   concursoId: number;
-  cor: string;
+  concursoCor: string;
 }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -29,7 +30,7 @@ export const DisciplinaCard = memo(function DisciplinaCard({
   return (
     <Card
       className="relative overflow-hidden border-l-4"
-      style={{ borderLeftColor: cor }}
+      style={{ borderLeftColor: disciplina.cor }}
     >
       <Link
         href={`/concursos/${concursoId}/disciplinas/${disciplina.id}`}
@@ -42,6 +43,11 @@ export const DisciplinaCard = memo(function DisciplinaCard({
           <CardDescription>
             {disciplina.estudadas}/{disciplina.total} matérias estudadas
           </CardDescription>
+          {parseDiasSemana(disciplina.dias_semana).length > 0 ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {formatDiasSemana(disciplina.dias_semana)}
+            </p>
+          ) : null}
         </div>
         <EntityMenu
           onEdit={() => setEditOpen(true)}
@@ -52,6 +58,7 @@ export const DisciplinaCard = memo(function DisciplinaCard({
       {editOpen ? (
         <DisciplinaFormDialog
           concursoId={concursoId}
+          concursoCor={concursoCor}
           disciplina={disciplina}
           open={editOpen}
           onOpenChange={setEditOpen}

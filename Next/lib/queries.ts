@@ -1,5 +1,11 @@
 import { db } from "./db";
-import type { Concurso, Disciplina, Materia, WithProgress } from "./types";
+import type {
+  Concurso,
+  Disciplina,
+  Materia,
+  WithProgress,
+  RevisaoComMateria,
+} from "./types";
 
 export function getConcursos(): (Concurso & WithProgress)[] {
   return db
@@ -54,4 +60,64 @@ export function getMaterias(disciplinaId: number): Materia[] {
     )
     .all(disciplinaId) as Array<Omit<Materia, "estudado"> & { estudado: number }>;
   return rows.map((row) => ({ ...row, estudado: row.estudado === 1 }));
+}
+
+export function getConcursosComDia(dia: string): (Concurso & WithProgress)[] {
+  return db
+    .prepare(
+      `SELECT
+        c.*,
+        COUNT(m.id) AS total,
+        COALESCE(SUM(m.estudado), 0) AS estudadas
+      FROM concursos c
+      INNER JOIN disciplinas d ON d.concurso_id = c.id
+        AND (',' || d.dias_semana || ',') LIKE ('%,' || ? || ',%')
+      LEFT JOIN materias m ON m.disciplina_id = d.id
+      GROUP BY c.id
+      ORDER BY c.created_at ASC`
+    )
+    .all(dia) as (Concurso & WithProgress)[];
+}
+
+export function getMateriasDoConcurso(
+  concursoId: number
+): (Materia & { disciplina_nome: string; disciplina_cor: string })[] {
+  return db
+    .prepare(
+      `SELECT m.*, d.nome AS disciplina_nome, d.cor AS disciplina_cor
+      FROM materias m
+      INNER JOIN disciplinas d ON d.id = m.disciplina_id
+      WHERE d.concurso_id = ?
+      ORDER BY d.nome ASC, m.nome ASC`
+    )
+    .all(concursoId) as (Materia & {
+    disciplina_nome: string;
+    disciplina_cor: string;
+  })[];
+}
+
+export function getRevisoesDoMes(
+  concursoId: number,
+  ano: number,
+  mes: number
+): RevisaoComMateria[] {
+  const inicio = `${ano}-${String(mes + 1).padStart(2, "0")}-01`;
+  const fim = `${ano}-${String(mes + 2).padStart(2, "0")}-01`;
+  return db
+    .prepare(
+      `SELECT
+        r.*,
+        m.nome AS materia_nome,
+        d.id AS disciplina_id,
+        d.nome AS disciplina_nome,
+        d.cor AS disciplina_cor
+      FROM revisoes r
+      INNER JOIN materias m ON m.id = r.materia_id
+      INNER JOIN disciplinas d ON d.id = m.disciplina_id
+      WHERE d.concurso_id = ?
+        AND r.data >= ?
+        AND r.data < ?
+      ORDER BY r.data ASC`
+    )
+    .all(concursoId, inicio, fim) as RevisaoComMateria[];
 }
