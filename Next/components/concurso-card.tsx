@@ -1,13 +1,8 @@
 "use client";
 
-import { memo, useState, useTransition } from "react";
+import { memo, useState } from "react";
 import Link from "next/link";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConcursoFormDialog } from "@/components/concurso-form-dialog";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { EntityMenu } from "@/components/entity-menu";
@@ -21,7 +16,6 @@ export const ConcursoCard = memo(function ConcursoCard({
 }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
 
   return (
     <Card
@@ -31,15 +25,10 @@ export const ConcursoCard = memo(function ConcursoCard({
       <Link
         href={`/concursos/${concurso.id}`}
         className="absolute inset-0 z-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        aria-label={`${concurso.nome}, ${concurso.estudadas}/${concurso.total} matérias estudadas`}
+        aria-label={concurso.nome}
       />
       <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <div>
-          <CardTitle>{concurso.nome}</CardTitle>
-          <CardDescription>
-            {concurso.estudadas}/{concurso.total} matérias estudadas
-          </CardDescription>
-        </div>
+        <CardTitle>{concurso.nome}</CardTitle>
         <EntityMenu
           onEdit={() => setEditOpen(true)}
           onDelete={() => setDeleteOpen(true)}

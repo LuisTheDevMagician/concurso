@@ -11,6 +11,7 @@ export interface Disciplina {
   nome: string;
   cor: string;
   dias_semana: string;
+  link_material: string | null;
   created_at: string;
 }
 

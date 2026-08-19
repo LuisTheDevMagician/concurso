@@ -62,6 +62,31 @@ export function getMaterias(disciplinaId: number): Materia[] {
   return rows.map((row) => ({ ...row, estudado: row.estudado === 1 }));
 }
 
+export function getConcursosParaCalendario(): (Concurso & {
+  diasSemana: string[];
+})[] {
+  const concursos = db
+    .prepare(`SELECT * FROM concursos ORDER BY created_at ASC`)
+    .all() as Concurso[];
+  const rows = db
+    .prepare(`SELECT concurso_id, dias_semana FROM disciplinas WHERE dias_semana != ''`)
+    .all() as { concurso_id: number; dias_semana: string }[];
+
+  const diasPorConcurso = new Map<number, Set<string>>();
+  for (const row of rows) {
+    const set = diasPorConcurso.get(row.concurso_id) ?? new Set<string>();
+    for (const dia of row.dias_semana.split(",").filter(Boolean)) {
+      set.add(dia);
+    }
+    diasPorConcurso.set(row.concurso_id, set);
+  }
+
+  return concursos.map((c) => ({
+    ...c,
+    diasSemana: Array.from(diasPorConcurso.get(c.id) ?? []),
+  }));
+}
+
 export function getConcursosComDia(dia: string): (Concurso & WithProgress)[] {
   return db
     .prepare(

@@ -27,6 +27,7 @@ db.exec(`
     nome TEXT NOT NULL,
     cor TEXT NOT NULL DEFAULT '#6366f1',
     dias_semana TEXT NOT NULL DEFAULT '',
+    link_material TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -46,3 +47,10 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 `);
+
+const disciplinaColumns = db
+  .prepare(`PRAGMA table_info(disciplinas)`)
+  .all() as { name: string }[];
+if (!disciplinaColumns.some((c) => c.name === "link_material")) {
+  db.exec(`ALTER TABLE disciplinas ADD COLUMN link_material TEXT`);
+}

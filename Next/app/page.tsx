@@ -1,15 +1,22 @@
+import { CalendarioConcursos } from "@/components/calendario-concursos";
 import { ColorLegend } from "@/components/color-legend";
 import { ConcursoCard } from "@/components/concurso-card";
 import { NewConcursoButton } from "@/components/new-concurso-button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { getConcursos, getConcursosComDia } from "@/lib/queries";
+import {
+  getConcursos,
+  getConcursosComDia,
+  getConcursosParaCalendario,
+} from "@/lib/queries";
 import { DIAS_SEMANA_FULL, getDiaAtual } from "@/lib/utils";
 
 export default function Home() {
   const concursos = getConcursos();
   const diaAtual = getDiaAtual();
   const concursosHoje = getConcursosComDia(diaAtual);
+  const concursosCalendario = getConcursosParaCalendario();
+  const now = new Date();
 
   return (
     <div className="flex flex-col gap-8">
@@ -56,6 +63,18 @@ export default function Home() {
                 <ConcursoCard key={concurso.id} concurso={concurso} />
               ))}
           </div>
+
+          {concursosCalendario.some((c) => c.diasSemana.length > 0) ? (
+            <>
+              <Separator />
+              <CalendarioConcursos
+                concursos={concursosCalendario}
+                ano={now.getFullYear()}
+                mes={now.getMonth()}
+              />
+            </>
+          ) : null}
+
           <ColorLegend items={concursos} />
         </>
       )}

@@ -23,6 +23,17 @@ function validateDias(dias: FormDataEntryValue | null) {
   return { dias: diasStr } as const;
 }
 
+function validateLink(link: FormDataEntryValue | null) {
+  const linkStr = String(link ?? "").trim();
+  if (!linkStr) return { link: null } as const;
+  if (!/^https?:\/\//i.test(linkStr)) {
+    return {
+      error: "Link inválido. Deve começar com http:// ou https://.",
+    } as const;
+  }
+  return { link: linkStr } as const;
+}
+
 export async function createDisciplina(
   concursoId: number,
   _prevState: DisciplinaFormState,
@@ -34,6 +45,8 @@ export async function createDisciplina(
   if ("error" in corResult) return corResult;
   const diasResult = validateDias(formData.get("dias_semana"));
   if ("error" in diasResult) return diasResult;
+  const linkResult = validateLink(formData.get("link_material"));
+  if ("error" in linkResult) return linkResult;
 
   try {
     const parent = db
@@ -42,8 +55,14 @@ export async function createDisciplina(
     if (!parent) return { error: "Concurso não encontrado." };
 
     db.prepare(
-      `INSERT INTO disciplinas (concurso_id, nome, cor, dias_semana) VALUES (?, ?, ?, ?)`
-    ).run(concursoId, nomeResult.nome, corResult.cor, diasResult.dias);
+      `INSERT INTO disciplinas (concurso_id, nome, cor, dias_semana, link_material) VALUES (?, ?, ?, ?, ?)`
+    ).run(
+      concursoId,
+      nomeResult.nome,
+      corResult.cor,
+      diasResult.dias,
+      linkResult.link
+    );
   } catch {
     return { error: "Erro ao criar disciplina." };
   }
@@ -62,11 +81,21 @@ export async function updateDisciplina(
   if ("error" in corResult) return corResult;
   const diasResult = validateDias(formData.get("dias_semana"));
   if ("error" in diasResult) return diasResult;
+  const linkResult = validateLink(formData.get("link_material"));
+  if ("error" in linkResult) return linkResult;
 
   try {
     const { changes } = db
-      .prepare(`UPDATE disciplinas SET nome = ?, cor = ?, dias_semana = ? WHERE id = ?`)
-      .run(nomeResult.nome, corResult.cor, diasResult.dias, id);
+      .prepare(
+        `UPDATE disciplinas SET nome = ?, cor = ?, dias_semana = ?, link_material = ? WHERE id = ?`
+      )
+      .run(
+        nomeResult.nome,
+        corResult.cor,
+        diasResult.dias,
+        linkResult.link,
+        id
+      );
     if (changes === 0) return { error: "Disciplina não encontrada." };
   } catch {
     return { error: "Erro ao salvar disciplina." };

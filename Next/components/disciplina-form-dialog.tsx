@@ -113,6 +113,19 @@ export function DisciplinaFormDialog({
                 Selecione os dias da semana em que pretende estudar esta disciplina.
               </FieldDescription>
             </Field>
+            <Field>
+              <FieldLabel htmlFor="link_material">
+                Link do material online
+              </FieldLabel>
+              <Input
+                id="link_material"
+                name="link_material"
+                type="url"
+                placeholder="https://..."
+                defaultValue={disciplina?.link_material ?? ""}
+              />
+              <FieldDescription>Opcional.</FieldDescription>
+            </Field>
           </FieldGroup>
           <DialogFooter>
             <Button type="submit" disabled={pending}>
