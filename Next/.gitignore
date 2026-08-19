@@ -25,6 +25,13 @@
 *.pem
 /data
 
+# local database (lives outside the repo at ~/.local/share/concurso-tracker,
+# this is a guard in case a copy ever ends up here)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
 # debug
 npm-debug.log*
 yarn-debug.log*

@@ -169,3 +169,73 @@
     transform: none;
   }
 }
+
+/* Crystal Green: frosted jade glass over a Mughal garden at night. */
+[data-theme="crystal-green"] body {
+  background-image:
+    radial-gradient(1100px 700px at 12% -8%, rgba(63, 153, 104, 0.35), transparent 60%),
+    radial-gradient(800px 550px at 100% 8%, rgba(201, 162, 75, 0.16), transparent 55%),
+    radial-gradient(900px 750px at 50% 115%, rgba(15, 42, 31, 0.65), transparent 62%),
+    repeating-linear-gradient(45deg, rgba(240, 237, 228, 0.02) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(-45deg, rgba(240, 237, 228, 0.02) 0 1px, transparent 1px 34px);
+  background-size: auto;
+  background-attachment: fixed;
+}
+
+[data-theme="crystal-green"] .bg-card,
+[data-theme="crystal-green"] .bg-popover {
+  backdrop-filter: blur(48px) saturate(200%) brightness(1.1);
+  -webkit-backdrop-filter: blur(48px) saturate(200%) brightness(1.1);
+}
+
+[data-theme="crystal-green"] .bg-card,
+[data-theme="crystal-green"] .bg-popover:not(.fixed) {
+  position: relative;
+}
+
+[data-theme="crystal-green"] .bg-card::after,
+[data-theme="crystal-green"] .bg-popover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse 140% 90% at 8% -20%,
+    rgba(255, 255, 255, 0.35),
+    transparent 55%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+[data-theme="crystal-green"] .bg-card::before,
+[data-theme="crystal-green"] .bg-popover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6),
+    rgba(201, 162, 75, 0.22) 45%,
+    transparent 75%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme="crystal-green"] .bg-card,
+  [data-theme="crystal-green"] .bg-popover {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
