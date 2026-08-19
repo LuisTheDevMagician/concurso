@@ -23,6 +23,7 @@
 - No automated test suite (per spec's Testing section — this is a personal study tool). Every task instead ends with an explicit, concrete manual verification (a command to run and its expected output, or a browser flow to click through). Do not skip these steps.
 - Follow shadcn/ui conventions throughout: semantic color tokens (never raw Tailwind colors), `gap-*` not `space-y-*`, `size-*` for equal dimensions, `cn()` for conditional classes, icons use `data-icon`, Dialog/AlertDialog/DropdownMenu compositions as documented.
 - This Next.js version has behavior that differs from training data (see `Next/AGENTS.md`). Two load-bearing facts already confirmed against the local docs and baked into the code below: `params` in dynamic route pages is a `Promise` typed via the ambient `PageProps<'/route'>` helper (must `await props.params`), and `better-sqlite3` is already on Next's built-in `serverExternalPackages` list so no `next.config.ts` change is needed for it to work in Server Components/Actions.
+- **This project's shadcn install uses `@base-ui/react`, not Radix UI** (discovered during Task 3 — `--preset base-nova` pulls in Base UI primitives). The code below has been corrected accordingly, but the pattern matters for any further hand-written Dialog/DropdownMenu/AlertDialog usage: there is no `asChild` prop anywhere — use the `render` prop instead (`<DialogTrigger render={trigger} />`, where `trigger` must be typed `React.ReactElement`, not `React.ReactNode`); `DropdownMenuItem` (Base UI's `Menu.Item`) has no `onSelect` — use `onClick`; `AlertDialogAction` already forwards props straight to an internal `Button`, so it never needs `asChild`/`render` — pass `type="submit"`/`variant="destructive"` directly on it.
 
 ---
 
@@ -453,24 +454,26 @@ export function EntityMenu({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative z-10"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <MoreVerticalIcon />
-          <span className="sr-only">Abrir menu</span>
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreVerticalIcon />
+            <span className="sr-only">Abrir menu</span>
+          </Button>
+        }
+      />
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
-          <DropdownMenuItem onSelect={onEdit}>
+          <DropdownMenuItem onClick={onEdit}>
             <PencilIcon data-icon="inline-start" />
             Editar
           </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+          <DropdownMenuItem variant="destructive" onClick={onDelete}>
             <TrashIcon data-icon="inline-start" />
             Apagar
           </DropdownMenuItem>
@@ -480,6 +483,8 @@ export function EntityMenu({
   );
 }
 ```
+
+(This project's shadcn install uses `@base-ui/react`, not Radix — `render` replaces `asChild`, `onClick` replaces `onSelect`. See the Global Constraints note.)
 
 - [ ] **Step 3: Create the reusable delete confirmation dialog**
 
@@ -523,10 +528,8 @@ export function DeleteAlertDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <form action={action}>
-            <AlertDialogAction asChild>
-              <Button type="submit" variant="destructive">
-                Apagar
-              </Button>
+            <AlertDialogAction type="submit" variant="destructive">
+              Apagar
             </AlertDialogAction>
           </form>
         </AlertDialogFooter>
@@ -608,7 +611,7 @@ export function ConcursoFormDialog({
   concurso?: Concurso;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
 }) {
   const action = concurso
     ? updateConcurso.bind(null, concurso.id)
@@ -625,7 +628,7 @@ export function ConcursoFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
+      {trigger ? <DialogTrigger render={trigger} /> : null}
       <DialogContent>
         <form action={formAction}>
           <DialogHeader>
@@ -707,7 +710,7 @@ export function ConcursoCard({
         className="absolute inset-0 z-0"
         aria-label={concurso.nome}
       />
-      <CardHeader className="relative z-10 flex flex-row items-start justify-between gap-2">
+      <CardHeader className="flex flex-row items-start justify-between gap-2">
         <div>
           <CardTitle>{concurso.nome}</CardTitle>
           <CardDescription>
@@ -937,9 +940,7 @@ export function AppBreadcrumb({
             {index > 0 ? <BreadcrumbSeparator /> : null}
             <BreadcrumbItem>
               {item.href ? (
-                <BreadcrumbLink asChild>
-                  <Link href={item.href}>{item.label}</Link>
-                </BreadcrumbLink>
+                <BreadcrumbLink render={<Link href={item.href}>{item.label}</Link>} />
               ) : (
                 <BreadcrumbPage>{item.label}</BreadcrumbPage>
               )}
@@ -997,7 +998,7 @@ export function DisciplinaFormDialog({
   disciplina?: Disciplina;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
 }) {
   const action = disciplina
     ? updateDisciplina.bind(null, disciplina.id)
@@ -1014,7 +1015,7 @@ export function DisciplinaFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
+      {trigger ? <DialogTrigger render={trigger} /> : null}
       <DialogContent>
         <form action={formAction}>
           <DialogHeader>
@@ -1088,7 +1089,7 @@ export function DisciplinaCard({
         className="absolute inset-0 z-0"
         aria-label={disciplina.nome}
       />
-      <CardHeader className="relative z-10 flex flex-row items-start justify-between gap-2">
+      <CardHeader className="flex flex-row items-start justify-between gap-2">
         <div>
           <CardTitle>{disciplina.nome}</CardTitle>
           <CardDescription>
@@ -1386,7 +1387,7 @@ export function MateriaFormDialog({
   materia?: Materia;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
 }) {
   const action = materia
     ? updateMateria.bind(null, materia.id)
@@ -1403,7 +1404,7 @@ export function MateriaFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
+      {trigger ? <DialogTrigger render={trigger} /> : null}
       <DialogContent>
         <form action={formAction}>
           <DialogHeader>
