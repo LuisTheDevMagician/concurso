@@ -2,14 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { validateNome } from "@/lib/utils";
 
 export type DisciplinaFormState = { error?: string };
-
-function validateNome(nome: FormDataEntryValue | null) {
-  const nomeStr = String(nome ?? "").trim();
-  if (!nomeStr) return { error: "Nome não pode ser vazio." } as const;
-  return { nome: nomeStr } as const;
-}
 
 export async function createDisciplina(
   concursoId: number,
@@ -19,10 +14,19 @@ export async function createDisciplina(
   const result = validateNome(formData.get("nome"));
   if ("error" in result) return result;
 
-  db.prepare(`INSERT INTO disciplinas (concurso_id, nome) VALUES (?, ?)`).run(
-    concursoId,
-    result.nome
-  );
+  try {
+    const parent = db
+      .prepare(`SELECT id FROM concursos WHERE id = ?`)
+      .get(concursoId);
+    if (!parent) return { error: "Concurso não encontrado." };
+
+    db.prepare(`INSERT INTO disciplinas (concurso_id, nome) VALUES (?, ?)`).run(
+      concursoId,
+      result.nome
+    );
+  } catch {
+    return { error: "Erro ao criar disciplina." };
+  }
   revalidatePath("/", "layout");
   return {};
 }
@@ -35,15 +39,23 @@ export async function updateDisciplina(
   const result = validateNome(formData.get("nome"));
   if ("error" in result) return result;
 
-  db.prepare(`UPDATE disciplinas SET nome = ? WHERE id = ?`).run(
-    result.nome,
-    id
-  );
+  try {
+    const { changes } = db
+      .prepare(`UPDATE disciplinas SET nome = ? WHERE id = ?`)
+      .run(result.nome, id);
+    if (changes === 0) return { error: "Disciplina não encontrada." };
+  } catch {
+    return { error: "Erro ao salvar disciplina." };
+  }
   revalidatePath("/", "layout");
   return {};
 }
 
 export async function deleteDisciplina(id: number) {
-  db.prepare(`DELETE FROM disciplinas WHERE id = ?`).run(id);
+  try {
+    db.prepare(`DELETE FROM disciplinas WHERE id = ?`).run(id);
+  } catch {
+    return;
+  }
   revalidatePath("/", "layout");
 }

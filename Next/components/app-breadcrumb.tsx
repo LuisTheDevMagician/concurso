@@ -18,7 +18,7 @@ export function AppBreadcrumb({
     <Breadcrumb>
       <BreadcrumbList>
         {items.map((item, index) => (
-          <Fragment key={item.label}>
+          <Fragment key={`${index}-${item.label}`}>
             {index > 0 ? <BreadcrumbSeparator /> : null}
             <BreadcrumbItem>
               {item.href ? (

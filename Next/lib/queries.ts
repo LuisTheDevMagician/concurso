@@ -48,9 +48,10 @@ export function getDisciplina(id: number): Disciplina | undefined {
 }
 
 export function getMaterias(disciplinaId: number): Materia[] {
-  return db
+  const rows = db
     .prepare(
       `SELECT * FROM materias WHERE disciplina_id = ? ORDER BY created_at ASC`
     )
-    .all(disciplinaId) as Materia[];
+    .all(disciplinaId) as Array<Omit<Materia, "estudado"> & { estudado: number }>;
+  return rows.map((row) => ({ ...row, estudado: row.estudado === 1 }));
 }

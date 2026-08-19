@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Field,
-  FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -44,12 +44,14 @@ export function ConcursoFormDialog({
   const [state, formAction, pending] = useActionState(action, initialState);
   const wasPending = useRef(false);
 
+  const handleClose = useCallback(() => onOpenChange(false), [onOpenChange]);
+
   useEffect(() => {
     if (wasPending.current && !pending && !state.error) {
-      onOpenChange(false);
+      handleClose();
     }
     wasPending.current = pending;
-  }, [pending, state, onOpenChange]);
+  }, [pending, state, handleClose]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -65,18 +67,16 @@ export function ConcursoFormDialog({
             </DialogDescription>
           </DialogHeader>
           <FieldGroup className="py-4">
-            <Field data-invalid={state.error ? true : undefined}>
+            <Field aria-invalid={state.error ? true : undefined}>
               <FieldLabel htmlFor="nome">Nome</FieldLabel>
               <Input
                 id="nome"
                 name="nome"
                 defaultValue={concurso?.nome}
-                aria-invalid={state.error ? true : undefined}
+                maxLength={100}
                 required
               />
-              {state.error ? (
-                <FieldDescription>{state.error}</FieldDescription>
-              ) : null}
+              {state.error ? <FieldError>{state.error}</FieldError> : null}
             </Field>
             <Field orientation="horizontal">
               <FieldLabel htmlFor="cor">Cor</FieldLabel>

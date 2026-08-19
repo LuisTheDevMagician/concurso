@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Card, CardTitle } from "@/components/ui/card";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { EntityMenu } from "@/components/entity-menu";
@@ -9,7 +9,7 @@ import { MateriaFormDialog } from "@/components/materia-form-dialog";
 import { deleteMateria } from "@/lib/actions/materias";
 import type { Materia } from "@/lib/types";
 
-export function MateriaCard({
+export const MateriaCard = memo(function MateriaCard({
   materia,
   disciplinaId,
   cor,
@@ -20,7 +20,6 @@ export function MateriaCard({
 }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const estudado = materia.estudado === 1;
 
   return (
     <Card
@@ -28,9 +27,11 @@ export function MateriaCard({
       style={{ borderLeftColor: cor }}
     >
       <div className="flex items-center gap-3">
-        <MateriaCheckbox materiaId={materia.id} estudado={estudado} />
+        <MateriaCheckbox materiaId={materia.id} estudado={materia.estudado} />
         <CardTitle
-          className={estudado ? "text-muted-foreground line-through" : undefined}
+          className={
+            materia.estudado ? "text-muted-foreground line-through" : undefined
+          }
         >
           {materia.nome}
         </CardTitle>
@@ -40,19 +41,24 @@ export function MateriaCard({
         onDelete={() => setDeleteOpen(true)}
       />
 
-      <MateriaFormDialog
-        disciplinaId={disciplinaId}
-        materia={materia}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-      />
+      {editOpen ? (
+        <MateriaFormDialog
+          disciplinaId={disciplinaId}
+          materia={materia}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+        />
+      ) : null}
       <DeleteAlertDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title={`Apagar "${materia.nome}"?`}
         description="Essa ação não pode ser desfeita."
-        action={deleteMateria.bind(null, materia.id)}
+        action={async () => {
+          await deleteMateria(materia.id);
+        }}
+        onSuccess={() => setDeleteOpen(false)}
       />
     </Card>
   );
-}
+});

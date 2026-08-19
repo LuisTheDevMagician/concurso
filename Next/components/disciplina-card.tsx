@@ -1,15 +1,20 @@
 "use client";
 
+import { memo, useState, useTransition } from "react";
 import Link from "next/link";
-import { useState } from "react";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { DisciplinaFormDialog } from "@/components/disciplina-form-dialog";
 import { EntityMenu } from "@/components/entity-menu";
 import { deleteDisciplina } from "@/lib/actions/disciplinas";
 import type { Disciplina, WithProgress } from "@/lib/types";
 
-export function DisciplinaCard({
+export const DisciplinaCard = memo(function DisciplinaCard({
   disciplina,
   concursoId,
   cor,
@@ -28,8 +33,8 @@ export function DisciplinaCard({
     >
       <Link
         href={`/concursos/${concursoId}/disciplinas/${disciplina.id}`}
-        className="absolute inset-0 z-0"
-        aria-label={disciplina.nome}
+        className="absolute inset-0 z-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        aria-label={`${disciplina.nome}, ${disciplina.estudadas}/${disciplina.total} matérias estudadas`}
       />
       <CardHeader className="flex flex-row items-start justify-between gap-2">
         <div>
@@ -44,19 +49,24 @@ export function DisciplinaCard({
         />
       </CardHeader>
 
-      <DisciplinaFormDialog
-        concursoId={concursoId}
-        disciplina={disciplina}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-      />
+      {editOpen ? (
+        <DisciplinaFormDialog
+          concursoId={concursoId}
+          disciplina={disciplina}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+        />
+      ) : null}
       <DeleteAlertDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title={`Apagar "${disciplina.nome}"?`}
         description="Isso vai apagar também todas as matérias dessa disciplina. Essa ação não pode ser desfeita."
-        action={deleteDisciplina.bind(null, disciplina.id)}
+        action={async () => {
+          await deleteDisciplina(disciplina.id);
+        }}
+        onSuccess={() => setDeleteOpen(false)}
       />
     </Card>
   );
-}
+});

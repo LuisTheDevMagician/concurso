@@ -2,7 +2,12 @@ import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
 
-const dataDir = path.join(process.cwd(), "data");
+const dataDir = path.join(
+  process.env.HOME ?? process.env.USERPROFILE ?? process.cwd(),
+  ".local",
+  "share",
+  "concurso-tracker"
+);
 fs.mkdirSync(dataDir, { recursive: true });
 
 export const db = new Database(path.join(dataDir, "concurso.db"));

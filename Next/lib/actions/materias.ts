@@ -2,14 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { validateNome } from "@/lib/utils";
 
 export type MateriaFormState = { error?: string };
-
-function validateNome(nome: FormDataEntryValue | null) {
-  const nomeStr = String(nome ?? "").trim();
-  if (!nomeStr) return { error: "Nome não pode ser vazio." } as const;
-  return { nome: nomeStr } as const;
-}
 
 export async function createMateria(
   disciplinaId: number,
@@ -19,10 +14,19 @@ export async function createMateria(
   const result = validateNome(formData.get("nome"));
   if ("error" in result) return result;
 
-  db.prepare(`INSERT INTO materias (disciplina_id, nome) VALUES (?, ?)`).run(
-    disciplinaId,
-    result.nome
-  );
+  try {
+    const parent = db
+      .prepare(`SELECT id FROM disciplinas WHERE id = ?`)
+      .get(disciplinaId);
+    if (!parent) return { error: "Disciplina não encontrada." };
+
+    db.prepare(`INSERT INTO materias (disciplina_id, nome) VALUES (?, ?)`).run(
+      disciplinaId,
+      result.nome
+    );
+  } catch {
+    return { error: "Erro ao criar matéria." };
+  }
   revalidatePath("/", "layout");
   return {};
 }
@@ -35,19 +39,34 @@ export async function updateMateria(
   const result = validateNome(formData.get("nome"));
   if ("error" in result) return result;
 
-  db.prepare(`UPDATE materias SET nome = ? WHERE id = ?`).run(result.nome, id);
+  try {
+    const { changes } = db
+      .prepare(`UPDATE materias SET nome = ? WHERE id = ?`)
+      .run(result.nome, id);
+    if (changes === 0) return { error: "Matéria não encontrada." };
+  } catch {
+    return { error: "Erro ao salvar matéria." };
+  }
   revalidatePath("/", "layout");
   return {};
 }
 
 export async function deleteMateria(id: number) {
-  db.prepare(`DELETE FROM materias WHERE id = ?`).run(id);
+  try {
+    db.prepare(`DELETE FROM materias WHERE id = ?`).run(id);
+  } catch {
+    return;
+  }
   revalidatePath("/", "layout");
 }
 
 export async function toggleMateriaEstudado(id: number) {
-  db.prepare(
-    `UPDATE materias SET estudado = CASE estudado WHEN 1 THEN 0 ELSE 1 END WHERE id = ?`
-  ).run(id);
+  try {
+    db.prepare(
+      `UPDATE materias SET estudado = CASE estudado WHEN 1 THEN 0 ELSE 1 END WHERE id = ?`
+    ).run(id);
+  } catch {
+    return;
+  }
   revalidatePath("/", "layout");
 }

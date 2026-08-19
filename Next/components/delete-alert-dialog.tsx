@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,13 +18,27 @@ export function DeleteAlertDialog({
   title,
   description,
   action,
+  onSuccess,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   description: string;
   action: () => Promise<void>;
+  onSuccess?: () => void;
 }) {
+  const [isPending, setIsPending] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsPending(true);
+    try {
+      await action();
+      onSuccess?.();
+    } finally {
+      setIsPending(false);
+    }
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -33,11 +48,16 @@ export function DeleteAlertDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <form action={action}>
-            <AlertDialogAction type="submit" variant="destructive">
-              Apagar
-            </AlertDialogAction>
-          </form>
+          <AlertDialogAction
+            variant="destructive"
+            disabled={isPending}
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+          >
+            {isPending ? "Apagando..." : "Apagar"}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
