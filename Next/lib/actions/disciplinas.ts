@@ -23,15 +23,21 @@ function validateDias(dias: FormDataEntryValue | null) {
   return { dias: diasStr } as const;
 }
 
-function validateLink(link: FormDataEntryValue | null) {
-  const linkStr = String(link ?? "").trim();
-  if (!linkStr) return { link: null } as const;
-  if (!/^https?:\/\//i.test(linkStr)) {
-    return {
-      error: "Link inválido. Deve começar com http:// ou https://.",
-    } as const;
+const LINK_RE = /^https?:\/\//i;
+
+function validateLinks(links: FormDataEntryValue[]) {
+  const result: string[] = [];
+  for (const link of links) {
+    const linkStr = String(link).trim();
+    if (!linkStr) continue;
+    if (!LINK_RE.test(linkStr)) {
+      return {
+        error: "Link inválido. Deve começar com http:// ou https://.",
+      } as const;
+    }
+    result.push(linkStr);
   }
-  return { link: linkStr } as const;
+  return { links: result } as const;
 }
 
 export async function createDisciplina(
@@ -45,8 +51,8 @@ export async function createDisciplina(
   if ("error" in corResult) return corResult;
   const diasResult = validateDias(formData.get("dias_semana"));
   if ("error" in diasResult) return diasResult;
-  const linkResult = validateLink(formData.get("link_material"));
-  if ("error" in linkResult) return linkResult;
+  const linksResult = validateLinks(formData.getAll("links"));
+  if ("error" in linksResult) return linksResult;
 
   try {
     const parent = db
@@ -55,13 +61,13 @@ export async function createDisciplina(
     if (!parent) return { error: "Concurso não encontrado." };
 
     db.prepare(
-      `INSERT INTO disciplinas (concurso_id, nome, cor, dias_semana, link_material) VALUES (?, ?, ?, ?, ?)`
+      `INSERT INTO disciplinas (concurso_id, nome, cor, dias_semana, links) VALUES (?, ?, ?, ?, ?)`
     ).run(
       concursoId,
       nomeResult.nome,
       corResult.cor,
       diasResult.dias,
-      linkResult.link
+      JSON.stringify(linksResult.links)
     );
   } catch {
     return { error: "Erro ao criar disciplina." };
@@ -81,19 +87,19 @@ export async function updateDisciplina(
   if ("error" in corResult) return corResult;
   const diasResult = validateDias(formData.get("dias_semana"));
   if ("error" in diasResult) return diasResult;
-  const linkResult = validateLink(formData.get("link_material"));
-  if ("error" in linkResult) return linkResult;
+  const linksResult = validateLinks(formData.getAll("links"));
+  if ("error" in linksResult) return linksResult;
 
   try {
     const { changes } = db
       .prepare(
-        `UPDATE disciplinas SET nome = ?, cor = ?, dias_semana = ?, link_material = ? WHERE id = ?`
+        `UPDATE disciplinas SET nome = ?, cor = ?, dias_semana = ?, links = ? WHERE id = ?`
       )
       .run(
         nomeResult.nome,
         corResult.cor,
         diasResult.dias,
-        linkResult.link,
+        JSON.stringify(linksResult.links),
         id
       );
     if (changes === 0) return { error: "Disciplina não encontrada." };

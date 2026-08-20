@@ -7,6 +7,12 @@ import type {
   RevisaoComMateria,
 } from "./types";
 
+function parseLinks<T extends { links: unknown }>(
+  row: T
+): Omit<T, "links"> & { links: string[] } {
+  return { ...row, links: JSON.parse(row.links as string) };
+}
+
 export function getConcursos(): (Concurso & WithProgress)[] {
   return db
     .prepare(
@@ -32,7 +38,7 @@ export function getConcurso(id: number): Concurso | undefined {
 export function getDisciplinas(
   concursoId: number
 ): (Disciplina & WithProgress)[] {
-  return db
+  const rows = db
     .prepare(
       `SELECT
         d.*,
@@ -45,12 +51,14 @@ export function getDisciplinas(
       ORDER BY d.created_at ASC`
     )
     .all(concursoId) as (Disciplina & WithProgress)[];
+  return rows.map(parseLinks);
 }
 
 export function getDisciplina(id: number): Disciplina | undefined {
-  return db.prepare(`SELECT * FROM disciplinas WHERE id = ?`).get(id) as
+  const row = db.prepare(`SELECT * FROM disciplinas WHERE id = ?`).get(id) as
     | Disciplina
     | undefined;
+  return row ? parseLinks(row) : undefined;
 }
 
 export function getMaterias(disciplinaId: number): Materia[] {
@@ -59,7 +67,7 @@ export function getMaterias(disciplinaId: number): Materia[] {
       `SELECT * FROM materias WHERE disciplina_id = ? ORDER BY created_at ASC`
     )
     .all(disciplinaId) as Array<Omit<Materia, "estudado"> & { estudado: number }>;
-  return rows.map((row) => ({ ...row, estudado: row.estudado === 1 }));
+  return rows.map((row) => parseLinks({ ...row, estudado: row.estudado === 1 }));
 }
 
 export function getConcursosParaCalendario(): (Concurso & {
@@ -107,7 +115,7 @@ export function getConcursosComDia(dia: string): (Concurso & WithProgress)[] {
 export function getMateriasDoConcurso(
   concursoId: number
 ): (Materia & { disciplina_nome: string; disciplina_cor: string })[] {
-  return db
+  const rows = db
     .prepare(
       `SELECT m.*, d.nome AS disciplina_nome, d.cor AS disciplina_cor
       FROM materias m
@@ -119,6 +127,7 @@ export function getMateriasDoConcurso(
     disciplina_nome: string;
     disciplina_cor: string;
   })[];
+  return rows.map(parseLinks);
 }
 
 export function getRevisoesDoConcurso(concursoId: number): RevisaoComMateria[] {

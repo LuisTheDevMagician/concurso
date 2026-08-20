@@ -2,6 +2,7 @@
 
 import { memo, useState } from "react";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
+import { EntityLinksButton } from "@/components/entity-links-button";
 import { EntityMenu } from "@/components/entity-menu";
 import { MateriaCheckbox } from "@/components/materia-checkbox";
 import { MateriaFormDialog } from "@/components/materia-form-dialog";
@@ -31,7 +32,7 @@ export const MateriaCard = memo(function MateriaCard({
       <MateriaCheckbox materiaId={materia.id} estudado={materia.estudado} />
       <span
         className={cn(
-          "flex-1 truncate text-sm",
+          "flex-1 break-words text-sm",
           materia.estudado
             ? "text-muted-foreground line-through decoration-primary/50"
             : "text-foreground"
@@ -39,7 +40,8 @@ export const MateriaCard = memo(function MateriaCard({
       >
         {materia.nome}
       </span>
-      <div className="opacity-0 transition-opacity group-hover/row:opacity-100 group-focus-within/row:opacity-100">
+      <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover/row:opacity-100 group-focus-within/row:opacity-100">
+        <EntityLinksButton links={materia.links} />
         <EntityMenu
           onEdit={() => setEditOpen(true)}
           onDelete={() => setDeleteOpen(true)}

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DiasSemanaToggle } from "@/components/dias-semana-toggle";
+import { LinksField } from "@/components/links-field";
 import {
   createDisciplina,
   updateDisciplina,
@@ -113,19 +114,7 @@ export function DisciplinaFormDialog({
                 Selecione os dias da semana em que pretende estudar esta disciplina.
               </FieldDescription>
             </Field>
-            <Field>
-              <FieldLabel htmlFor="link_material">
-                Link do material online
-              </FieldLabel>
-              <Input
-                id="link_material"
-                name="link_material"
-                type="url"
-                placeholder="https://..."
-                defaultValue={disciplina?.link_material ?? ""}
-              />
-              <FieldDescription>Opcional.</FieldDescription>
-            </Field>
+            <LinksField links={disciplina?.links ?? []} open={open} />
           </FieldGroup>
           <DialogFooter>
             <Button type="submit" disabled={pending}>

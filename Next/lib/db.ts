@@ -28,6 +28,7 @@ db.exec(`
     cor TEXT NOT NULL DEFAULT '#6366f1',
     dias_semana TEXT NOT NULL DEFAULT '',
     link_material TEXT,
+    links TEXT NOT NULL DEFAULT '[]',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -36,6 +37,8 @@ db.exec(`
     disciplina_id INTEGER NOT NULL REFERENCES disciplinas(id) ON DELETE CASCADE,
     nome TEXT NOT NULL,
     estudado INTEGER NOT NULL DEFAULT 0,
+    link TEXT,
+    links TEXT NOT NULL DEFAULT '[]',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -53,4 +56,33 @@ const disciplinaColumns = db
   .all() as { name: string }[];
 if (!disciplinaColumns.some((c) => c.name === "link_material")) {
   db.exec(`ALTER TABLE disciplinas ADD COLUMN link_material TEXT`);
+}
+if (!disciplinaColumns.some((c) => c.name === "links")) {
+  db.exec(`ALTER TABLE disciplinas ADD COLUMN links TEXT NOT NULL DEFAULT '[]'`);
+  for (const row of db
+    .prepare(`SELECT id, link_material FROM disciplinas WHERE link_material IS NOT NULL AND link_material != ''`)
+    .all() as { id: number; link_material: string }[]) {
+    db.prepare(`UPDATE disciplinas SET links = ? WHERE id = ?`).run(
+      JSON.stringify([row.link_material]),
+      row.id
+    );
+  }
+}
+
+const materiaColumns = db
+  .prepare(`PRAGMA table_info(materias)`)
+  .all() as { name: string }[];
+if (!materiaColumns.some((c) => c.name === "link")) {
+  db.exec(`ALTER TABLE materias ADD COLUMN link TEXT`);
+}
+if (!materiaColumns.some((c) => c.name === "links")) {
+  db.exec(`ALTER TABLE materias ADD COLUMN links TEXT NOT NULL DEFAULT '[]'`);
+  for (const row of db
+    .prepare(`SELECT id, link FROM materias WHERE link IS NOT NULL AND link != ''`)
+    .all() as { id: number; link: string }[]) {
+    db.prepare(`UPDATE materias SET links = ? WHERE id = ?`).run(
+      JSON.stringify([row.link]),
+      row.id
+    );
+  }
 }

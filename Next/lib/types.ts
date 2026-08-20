@@ -11,7 +11,7 @@ export interface Disciplina {
   nome: string;
   cor: string;
   dias_semana: string;
-  link_material: string | null;
+  links: string[];
   created_at: string;
 }
 
@@ -20,6 +20,7 @@ export interface Materia {
   disciplina_id: number;
   nome: string;
   estudado: boolean;
+  links: string[];
   created_at: string;
 }
 

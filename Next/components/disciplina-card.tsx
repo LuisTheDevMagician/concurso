@@ -2,11 +2,10 @@
 
 import { memo, useState } from "react";
 import Link from "next/link";
-import { ExternalLinkIcon } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { DeleteAlertDialog } from "@/components/delete-alert-dialog";
 import { DisciplinaFormDialog } from "@/components/disciplina-form-dialog";
+import { EntityLinksButton } from "@/components/entity-links-button";
 import { EntityMenu } from "@/components/entity-menu";
 import { deleteDisciplina } from "@/lib/actions/disciplinas";
 import { formatDiasSemana, parseDiasSemana } from "@/lib/utils";
@@ -65,25 +64,7 @@ export const DisciplinaCard = memo(function DisciplinaCard({
           ) : null}
         </div>
         <div className="flex items-center gap-1">
-          {disciplina.link_material ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative z-10"
-              nativeButton={false}
-              render={
-                <a
-                  href={disciplina.link_material}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label="Abrir material online em outra aba"
-                />
-              }
-            >
-              <ExternalLinkIcon />
-            </Button>
-          ) : null}
+          <EntityLinksButton links={disciplina.links} />
           <EntityMenu
             onEdit={() => setEditOpen(true)}
             onDelete={() => setDeleteOpen(true)}

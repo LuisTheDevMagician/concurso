@@ -6,13 +6,32 @@ import { validateNome } from "@/lib/utils";
 
 export type MateriaFormState = { error?: string };
 
+const LINK_RE = /^https?:\/\//i;
+
+function validateLinks(links: FormDataEntryValue[]) {
+  const result: string[] = [];
+  for (const link of links) {
+    const linkStr = String(link).trim();
+    if (!linkStr) continue;
+    if (!LINK_RE.test(linkStr)) {
+      return {
+        error: "Link inválido. Deve começar com http:// ou https://.",
+      } as const;
+    }
+    result.push(linkStr);
+  }
+  return { links: result } as const;
+}
+
 export async function createMateria(
   disciplinaId: number,
   _prevState: MateriaFormState,
   formData: FormData
 ): Promise<MateriaFormState> {
-  const result = validateNome(formData.get("nome"));
-  if ("error" in result) return result;
+  const nomeResult = validateNome(formData.get("nome"));
+  if ("error" in nomeResult) return nomeResult;
+  const linksResult = validateLinks(formData.getAll("links"));
+  if ("error" in linksResult) return linksResult;
 
   try {
     const parent = db
@@ -20,10 +39,9 @@ export async function createMateria(
       .get(disciplinaId);
     if (!parent) return { error: "Disciplina não encontrada." };
 
-    db.prepare(`INSERT INTO materias (disciplina_id, nome) VALUES (?, ?)`).run(
-      disciplinaId,
-      result.nome
-    );
+    db.prepare(
+      `INSERT INTO materias (disciplina_id, nome, links) VALUES (?, ?, ?)`
+    ).run(disciplinaId, nomeResult.nome, JSON.stringify(linksResult.links));
   } catch {
     return { error: "Erro ao criar matéria." };
   }
@@ -36,13 +54,15 @@ export async function updateMateria(
   _prevState: MateriaFormState,
   formData: FormData
 ): Promise<MateriaFormState> {
-  const result = validateNome(formData.get("nome"));
-  if ("error" in result) return result;
+  const nomeResult = validateNome(formData.get("nome"));
+  if ("error" in nomeResult) return nomeResult;
+  const linksResult = validateLinks(formData.getAll("links"));
+  if ("error" in linksResult) return linksResult;
 
   try {
     const { changes } = db
-      .prepare(`UPDATE materias SET nome = ? WHERE id = ?`)
-      .run(result.nome, id);
+      .prepare(`UPDATE materias SET nome = ?, links = ? WHERE id = ?`)
+      .run(nomeResult.nome, JSON.stringify(linksResult.links), id);
     if (changes === 0) return { error: "Matéria não encontrada." };
   } catch {
     return { error: "Erro ao salvar matéria." };

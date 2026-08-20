@@ -18,6 +18,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { LinksField } from "@/components/links-field";
 import {
   createMateria,
   updateMateria,
@@ -78,6 +79,7 @@ export function MateriaFormDialog({
               />
               {state.error ? <FieldError>{state.error}</FieldError> : null}
             </Field>
+            <LinksField links={materia?.links ?? []} open={open} />
           </FieldGroup>
           <DialogFooter>
             <Button type="submit" disabled={pending}>
