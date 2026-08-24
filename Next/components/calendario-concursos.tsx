@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { Concurso } from "@/lib/types";
+import { getDiaSemanaArmazenado, getDiaSemanaGrade } from "@/lib/utils";
 
 const DIAS_HEADER = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
@@ -24,11 +25,6 @@ const MESES = [
 
 function getDiasDoMes(ano: number, mes: number): number {
   return new Date(ano, mes + 1, 0).getDate();
-}
-
-function getDiaSemana(ano: number, mes: number, dia: number): number {
-  const d = new Date(ano, mes, dia).getDay();
-  return d === 0 ? 6 : d - 1;
 }
 
 export function CalendarioConcursos({
@@ -53,13 +49,13 @@ export function CalendarioConcursos({
   };
 
   const totalDias = getDiasDoMes(ano, mes);
-  const primeiroDia = getDiaSemana(ano, mes, 1);
+  const primeiroDia = getDiaSemanaGrade(ano, mes, 1);
 
   const concursosPorDia = new Map<number, Concurso[]>();
   for (const c of concursos) {
     if (c.diasSemana.length === 0) continue;
     for (let dia = 1; dia <= totalDias; dia++) {
-      const diaSemana = getDiaSemana(ano, mes, dia);
+      const diaSemana = getDiaSemanaArmazenado(ano, mes, dia);
       if (c.diasSemana.includes(String(diaSemana))) {
         const list = concursosPorDia.get(dia) ?? [];
         list.push(c);

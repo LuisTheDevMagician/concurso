@@ -4,7 +4,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { Disciplina, WithProgress } from "@/lib/types";
-import { parseDiasSemana } from "@/lib/utils";
+import {
+  getDiaSemanaArmazenado,
+  getDiaSemanaGrade,
+  parseDiasSemana,
+} from "@/lib/utils";
 
 const DIAS_HEADER = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
@@ -25,11 +29,6 @@ const MESES = [
 
 function getDiasDoMes(ano: number, mes: number): number {
   return new Date(ano, mes + 1, 0).getDate();
-}
-
-function getDiaSemana(ano: number, mes: number, dia: number): number {
-  const d = new Date(ano, mes, dia).getDay();
-  return d === 0 ? 6 : d - 1;
 }
 
 export function CalendarioMes({
@@ -54,14 +53,14 @@ export function CalendarioMes({
   };
 
   const totalDias = getDiasDoMes(ano, mes);
-  const primeiroDia = getDiaSemana(ano, mes, 1);
+  const primeiroDia = getDiaSemanaGrade(ano, mes, 1);
 
   const disciplinasPorDia = new Map<number, (Disciplina & WithProgress)[]>();
   for (const d of disciplinas) {
     const dias = parseDiasSemana(d.dias_semana);
     if (dias.length === 0) continue;
     for (let dia = 1; dia <= totalDias; dia++) {
-      const diaSemana = getDiaSemana(ano, mes, dia);
+      const diaSemana = getDiaSemanaArmazenado(ano, mes, dia);
       if (dias.includes(String(diaSemana))) {
         const list = disciplinasPorDia.get(dia) ?? [];
         list.push(d);

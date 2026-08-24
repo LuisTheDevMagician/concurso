@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { RevisaoComMateria } from "@/lib/types";
+import { getDiaSemanaGrade } from "@/lib/utils";
 
 const DIAS_HEADER = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
@@ -24,11 +25,6 @@ const MESES = [
 
 function getDiasDoMes(ano: number, mes: number): number {
   return new Date(ano, mes + 1, 0).getDate();
-}
-
-function getDiaSemana(ano: number, mes: number, dia: number): number {
-  const d = new Date(ano, mes, dia).getDay();
-  return d === 0 ? 6 : d - 1;
 }
 
 export function CalendarioRevisoes({
@@ -55,7 +51,7 @@ export function CalendarioRevisoes({
   };
 
   const totalDias = getDiasDoMes(ano, mes);
-  const primeiroDia = getDiaSemana(ano, mes, 1);
+  const primeiroDia = getDiaSemanaGrade(ano, mes, 1);
 
   const prefixo = `${ano}-${String(mes + 1).padStart(2, "0")}`;
   const revisoesMes = revisoes.filter((r) => r.data.startsWith(prefixo));

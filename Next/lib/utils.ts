@@ -49,3 +49,24 @@ export function formatDiasSemana(dias: string): string {
 export function getDiaAtual(): string {
   return String(new Date().getDay());
 }
+
+// Duas convenções de dia da semana convivem no app, e confundi-las já causou bug:
+//
+// - ARMAZENADA: o número de `Date.getDay()` (0=Dom ... 6=Sáb). É o que a coluna
+//   `dias_semana` guarda, o que `DIAS_SEMANA` oferece e o que `getDiaAtual` devolve.
+//   Use para comparar uma data com os dias escolhidos pelo usuário.
+// - GRADE: os calendários são desenhados de segunda a domingo (0=Seg ... 6=Dom).
+//   Use apenas para posicionar as células vazias antes do dia 1º.
+
+export function getDiaSemanaArmazenado(
+  ano: number,
+  mes: number,
+  dia: number
+): number {
+  return new Date(ano, mes, dia).getDay();
+}
+
+export function getDiaSemanaGrade(ano: number, mes: number, dia: number): number {
+  const d = getDiaSemanaArmazenado(ano, mes, dia);
+  return d === 0 ? 6 : d - 1;
+}
