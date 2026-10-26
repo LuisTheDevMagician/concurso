@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,9 +34,38 @@ export function AddRevisaoModal({
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [dataBase, setDataBase] = useState(() => {
     const d = new Date();
-    return d.toISOString().split("T")[0];
+    return {
+      dia: String(d.getDate()).padStart(2, "0"),
+      mes: String(d.getMonth() + 1).padStart(2, "0"),
+      ano: String(d.getFullYear()),
+    };
   });
   const [pending, setPending] = useState(false);
+
+  const dataValida =
+    /^\d{1,2}$/.test(dataBase.dia) &&
+    /^\d{1,2}$/.test(dataBase.mes) &&
+    /^\d{4}$/.test(dataBase.ano);
+  const iso = dataValida
+    ? `${dataBase.ano}-${dataBase.mes.padStart(2, "0")}-${dataBase.dia.padStart(2, "0")}`
+    : "";
+  const dataExiste = dataValida && !isNaN(new Date(iso).getTime());
+
+  const setNumerico =
+    (campo: "dia" | "mes" | "ano", maxLen: number) =>
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const valor = e.target.value.replace(/\D/g, "").slice(0, maxLen);
+      setDataBase((prev) => ({ ...prev, [campo]: valor }));
+    };
+
+  const datePickerRef = useRef<HTMLInputElement>(null);
+
+  const handleCalendarChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const valor = e.target.value; // "aaaa-mm-dd" ou ""
+    if (!valor) return;
+    const [ano, mes, dia] = valor.split("-");
+    setDataBase({ dia, mes, ano });
+  };
 
   const grouped = new Map<string, MateriaComDisciplina[]>();
   for (const m of materias) {
@@ -57,7 +87,7 @@ export function AddRevisaoModal({
     if (selected.size === 0) return;
     setPending(true);
     try {
-      await createRevisoes(Array.from(selected), dataBase);
+      await createRevisoes(Array.from(selected), iso);
       setSelected(new Set());
       setOpen(false);
     } finally {
@@ -84,13 +114,57 @@ export function AddRevisaoModal({
         </DialogHeader>
         <FieldGroup className="py-2 max-h-80 overflow-y-auto">
           <Field>
-            <FieldLabel htmlFor="data-revisao">Data base</FieldLabel>
-            <Input
-              id="data-revisao"
-              type="date"
-              value={dataBase}
-              onChange={(e) => setDataBase(e.target.value)}
-            />
+            <FieldLabel htmlFor="data-revisao-dia">Data base</FieldLabel>
+            <div className="flex items-center gap-1.5">
+              <Input
+                id="data-revisao-dia"
+                inputMode="numeric"
+                placeholder="dd"
+                aria-label="Dia"
+                value={dataBase.dia}
+                onChange={setNumerico("dia", 2)}
+                className="w-16 text-center"
+              />
+              <span className="text-muted-foreground select-none">/</span>
+              <Input
+                inputMode="numeric"
+                placeholder="mm"
+                aria-label="Mês"
+                value={dataBase.mes}
+                onChange={setNumerico("mes", 2)}
+                className="w-16 text-center"
+              />
+              <span className="text-muted-foreground select-none">/</span>
+              <Input
+                inputMode="numeric"
+                placeholder="aaaa"
+                aria-label="Ano"
+                value={dataBase.ano}
+                onChange={setNumerico("ano", 4)}
+                className="w-20 text-center"
+              />
+              <span
+                className="relative size-8 shrink-0 grid place-items-center rounded-lg border border-input bg-transparent"
+                title="Selecionar no calendário"
+              >
+                <CalendarIcon className="size-4 text-muted-foreground pointer-events-none" />
+                <input
+                  ref={datePickerRef}
+                  type="date"
+                  value={dataExiste ? iso : ""}
+                  onChange={handleCalendarChange}
+                  aria-label="Selecionar data no calendário"
+                  onClick={() => {
+                    try {
+                      datePickerRef.current?.showPicker();
+                    } catch {
+                      /* navegadores sem showPicker abrem no clique do ícone nativo */
+                    }
+                  }}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </span>
+            </div>
           </Field>
           {Array.from(grouped.entries()).map(([discNome, items]) => (
             <div key={discNome} className="flex flex-col gap-1.5">
@@ -119,9 +193,13 @@ export function AddRevisaoModal({
         <DialogFooter>
           <Button
             onClick={handleSubmit}
-            disabled={pending || selected.size === 0}
+            disabled={pending || selected.size === 0 || !dataExiste}
           >
-            {pending ? "Criando..." : `Criar ${selected.size * 4} revisões`}
+            {pending
+              ? "Criando..."
+              : dataExiste && selected.size > 0
+                ? `Criar ${selected.size * 4} revisões`
+                : "Criar revisões"}
           </Button>
         </DialogFooter>
       </DialogContent>
